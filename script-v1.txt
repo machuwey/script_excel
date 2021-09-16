@@ -1,0 +1,114 @@
+//AUTHOR: MATVEY DERGUNOV
+//Code that insert borders by months, and also insert checkboxes for wvery row.
+//For Ian Hii
+
+////////////////////////////////////////////////////////////
+//CHANGE THIS VALUE IF YOU WANT TO START ON ANOTHER ROW//
+////////////////////////////////////////////////////////////
+var row=1;
+
+///////////////////////////////////////////////////////////////
+//CHANGE THIS VARIABLE IF YOU WANT TO START ON ANOTHER COLUMN//
+///////////////////////////////////////////////////////////////
+var checkboxColumn=9;
+  
+//Main function for testing
+function main(){
+  sortByDate();
+  paintBorders();
+  addAllCheckboxes();
+}
+
+//When we open the sheets it will execute this sequence
+function onOpen(){
+  sortByDate();
+  paintBorders();
+  addAllCheckboxes();
+}
+
+//Paint borders
+function paintBorders() {
+
+  //Activation and selection of the active Sheet
+  var app = SpreadsheetApp;
+  var ss = app.getActiveSpreadsheet();
+  var activeSheet = ss.getActiveSheet();
+  
+  //Initilizing variables needed
+  var prevMonth = 0/0/0; //Variable used to store the preavious cell's month, to compare with the next cell's month (actMonth)
+  var actMonth;
+
+  //Here we read the first cell
+  var r = activeSheet.getRange(row,1).getValue();
+
+  //Basic iteration through the cells, the iteration won't stop until it finds a blank cell.
+  while (r!=""){
+
+    //Here extract and store the cell's month, from the cell's value we read (r).
+    actMonth = r.getMonth();
+
+    activeSheet.getRange(row, 1, 1, checkboxColumn).setBorder(false, false, false, false, false, false);
+    //Here we decide what borders to insert, depending on if there is a change of month or its the same month as preavious.
+    if (actMonth!=prevMonth || prevMonth == 0){
+      activeSheet.getRange(row, 1, 1, checkboxColumn).setBorder(true, true, null, true,false,false, "green",SpreadsheetApp.BorderStyle.SOLID);
+    } else {
+      activeSheet.getRange(row, 1, 1, checkboxColumn).setBorder(null, true, null, true,false,false, "green",SpreadsheetApp.BorderStyle.SOLID);
+    }
+
+    //////////////////////////////////////////////////////
+    //HERE WE START PREPARING THE NEXT ITERATION//////////
+    //Increment row (for reading the next time the next cell)
+    row++;
+
+    //Get of the value of the next month
+    r = activeSheet.getRange(row, 1, 1).getValue();
+
+    //Swtich the prevMonth to actualMonth, as actualMonth gonna 
+    prevMonth = actMonth;
+  }
+
+  //When we finished we need to insert the las bottom cell's border
+  //Inserting of the last border
+  activeSheet.getRange(row, 1, 1, checkboxColumn).setBorder(true, null, null, null,false,false, "green",SpreadsheetApp.BorderStyle.SOLID);
+}
+
+function onEdit(e){
+  var app = SpreadsheetApp;
+  var ss = app.getActiveSpreadsheet();
+  var acctiveSheet = ss.getActiveSheet();
+  var thisRow = e.range.getRow();
+  acctiveSheet.getRange(thisRow, checkboxColumn).insertCheckboxes();
+  sortByDate();
+  paintBorders();
+}
+
+//Sorting of the rows by date
+function sortByDate(){
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  sheet.sort(1);
+}
+
+//Add all check
+function addAllCheckboxes(){
+  var app = SpreadsheetApp;
+  var ss = app.getActiveSpreadsheet();
+  var acctiveSheet = ss.getActiveSheet();
+  var checkboxColumn=9;
+  var row = 1;
+  var r = acctiveSheet.getRange(row,1).getValue();
+  while (r!=""){
+
+    //Here we insert the checkboxes
+    acctiveSheet.getRange(row, checkboxColumn).insertCheckboxes();
+
+    //////////////////////////////////////////////////////
+    //HERE WE START PREPARING THE NEXT ITERATION//////////
+    //Increment row (for reading the next time the next cell)
+    row++;
+
+    //Get of the value of the next month
+    r = acctiveSheet.getRange(row, 1, 1).getValue();
+
+  }
+}
